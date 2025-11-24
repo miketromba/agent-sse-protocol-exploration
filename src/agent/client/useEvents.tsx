@@ -1,104 +1,28 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import type { AgentEvent, AgentEventChunk } from '../types'
+import { EventAssembler } from '../eventAssembler'
 
 export function useEvents() {
-	const [events, setEvents] = useState<AgentEvent[]>([])
+	// Use EventAssembler for shared chunk processing logic
+	const [assembler] = useState(() => new EventAssembler())
+	const [updateCounter, setUpdateCounter] = useState(0)
+
+	// Get events from assembler (memoized to avoid unnecessary re-renders)
+	const events = useMemo(
+		() => assembler.getEvents(),
+		[assembler, updateCounter]
+	)
 
 	function addEvent(event: AgentEvent) {
-		setEvents(prev => [...prev, event])
+		// Directly add to the events array
+		assembler.getEvents().push(event)
+		setUpdateCounter(c => c + 1)
 	}
 
 	function addEventChunk(chunk: AgentEventChunk) {
-		if (chunk.type === 'message_delta') {
-			setEvents(prev => {
-				const lastEvent = prev[prev.length - 1]
-				// If last event is an agent message, append to it
-				if (
-					lastEvent?.type === 'message' &&
-					lastEvent.role === 'agent'
-				) {
-					return [
-						...prev.slice(0, -1),
-						{ ...lastEvent, text: lastEvent.text + chunk.delta }
-					]
-				}
-				// Otherwise, start a new message
-				return [
-					...prev,
-					{
-						type: 'message',
-						role: 'agent',
-						text: chunk.delta
-					}
-				]
-			})
-		} else if (chunk.type === 'tool_start') {
-			// Start new tool event
-			const newEvent: AgentEvent = {
-				type: 'tool',
-				id: chunk.id,
-				toolName: chunk.toolName,
-				input: '',
-				output: ''
-			}
-			addEvent(newEvent)
-		} else if (chunk.type === 'tool_input') {
-			// Update tool input by ID
-			updateEvent({
-				type: 'tool',
-				id: chunk.id,
-				input: chunk.input
-			})
-		} else if (chunk.type === 'tool_output') {
-			// Update tool output by ID
-			updateEvent({
-				type: 'tool',
-				id: chunk.id,
-				output: chunk.output
-			})
-		}
-	}
-
-	function updateEvent(update: Partial<AgentEvent>) {
-		setEvents(prev => {
-			if ('id' in update) {
-				// Update tool event by ID
-				const index = prev.findIndex(
-					event => 'id' in event && event.id === update.id
-				)
-				if (index !== -1) {
-					// Use map for single-pass update
-					return prev.map((event, i) =>
-						i === index
-							? ({ ...event, ...update } as AgentEvent)
-							: event
-					)
-				}
-			} else if (update.type === 'message') {
-				// Find last agent message from the end
-				let lastAgentIndex = -1
-				for (let i = prev.length - 1; i >= 0; i--) {
-					const event = prev[i]
-					if (
-						event &&
-						event.type === 'message' &&
-						event.role === 'agent'
-					) {
-						lastAgentIndex = i
-						break
-					}
-				}
-
-				if (lastAgentIndex !== -1) {
-					return prev.map((event, i) =>
-						i === lastAgentIndex
-							? ({ ...event, ...update } as AgentEvent)
-							: event
-					)
-				}
-			}
-			return [...prev, update as AgentEvent]
-		})
+		// Use shared assembler logic
+		assembler.addChunk(chunk)
+		setUpdateCounter(c => c + 1)
 	}
 
 	return { events, addEvent, addEventChunk }

@@ -2,13 +2,16 @@ import { stepCountIs, streamText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { EventStream } from './EventStream'
 import { getWeatherTool } from './getWeatherTool'
+import type { AgentEvent } from '../types'
 
 export function streamAgentResponse({
 	message,
-	abortSignal
+	abortSignal,
+	onFinish
 }: {
 	message: string
 	abortSignal?: AbortSignal
+	onFinish?: (events: AgentEvent[]) => Promise<void>
 }): EventStream {
 	const eventStream = new EventStream()
 
@@ -27,7 +30,6 @@ export function streamAgentResponse({
 
 			// Consume the async iterator directly - more efficient than pipeTo
 			for await (const chunk of fullStream) {
-				console.log(chunk)
 				if (chunk.type === 'text-delta') {
 					eventStream.push({
 						type: 'message_delta',
@@ -60,6 +62,19 @@ export function streamAgentResponse({
 			eventStream.error(
 				error instanceof Error ? error : new Error(String(error))
 			)
+		} finally {
+			// Always call onFinish, even on abortion or error
+			// This ensures the callback runs regardless of how the stream ends
+			if (onFinish) {
+				await onFinish([
+					{
+						type: 'message',
+						role: 'user',
+						text: message
+					},
+					...eventStream.getEvents()
+				])
+			}
 		}
 	})()
 

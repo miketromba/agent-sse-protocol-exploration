@@ -1,11 +1,13 @@
-import type { AgentEventChunk } from '../types'
+import type { AgentEvent, AgentEventChunk } from '../types'
 import { encode } from '@msgpack/msgpack'
+import { EventAssembler } from '../eventAssembler'
 
 export class EventStream {
 	private stream: ReadableStream<Uint8Array>
 	private controller: ReadableStreamDefaultController<Uint8Array> | null =
 		null
 	private isCancelled = false
+	private assembler = new EventAssembler()
 
 	constructor() {
 		this.stream = new ReadableStream({
@@ -19,6 +21,9 @@ export class EventStream {
 	}
 
 	push(chunk: AgentEventChunk) {
+		// Always track chunks in assembler for persistence
+		this.assembler.addChunk(chunk)
+
 		if (!this.controller || this.isCancelled) {
 			return
 		}
@@ -49,6 +54,14 @@ export class EventStream {
 		if (this.controller) {
 			this.controller.error(error)
 		}
+	}
+
+	/**
+	 * Get all assembled events from the stream.
+	 * Call this after the stream has finished to retrieve the complete event history.
+	 */
+	getEvents(): AgentEvent[] {
+		return this.assembler.getEvents()
 	}
 
 	getReadableStream(): ReadableStream<Uint8Array> {
