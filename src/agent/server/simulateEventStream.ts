@@ -1,5 +1,5 @@
 import type { AgentEvent, AgentEventChunk } from '../types'
-import { EventStream } from '../EventStream'
+import { EventStream } from './EventStream'
 import { placeholderEvents } from './placeholderData'
 
 // Helper to generate a random number between min and max

@@ -1,6 +1,6 @@
 import { stepCountIs, streamText } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
-import { EventStream } from '../EventStream'
+import { EventStream } from './EventStream'
 import { getWeatherTool } from './getWeatherTool'
 
 export function streamAgentResponse({

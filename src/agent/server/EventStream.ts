@@ -1,4 +1,4 @@
-import type { AgentEventChunk } from './types'
+import type { AgentEventChunk } from '../types'
 
 export class EventStream {
 	private stream: ReadableStream<Uint8Array>

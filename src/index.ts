@@ -1,10 +1,9 @@
 import { serve } from 'bun'
 import index from './index.html'
-import { streamAgentResponse } from './agent/server/Agent'
+import { streamAgentResponse } from './agent/server/streamAgentResponse'
 import z from 'zod'
 
-// import { simulateEventStream } from './agent/server/simulateEventStream'
-// const SIMULATE_ERROR = true
+import { simulateEventStream } from './agent/server/simulateEventStream'
 
 const server = serve({
 	routes: {
@@ -12,10 +11,8 @@ const server = serve({
 			POST: async req => {
 				const rawBody = await req.json()
 				const body = z.object({ message: z.string() }).parse(rawBody)
-				console.log('Received chat message:', body)
 
-				// Set simulateError to true to test error handling
-				// const eventStream = simulateEventStream(placeholderEvents, SIMULATE_ERROR)
+				// const eventStream = simulateEventStream()
 
 				const eventStream = streamAgentResponse({
 					message: body.message,
