@@ -1,4 +1,4 @@
-import type { AgentEvent } from './types'
+import type { AgentEvent } from '../types'
 
 // Placeholder events for streaming responses from the server
 // Simulates a complex agentic workflow with multiple tool calls

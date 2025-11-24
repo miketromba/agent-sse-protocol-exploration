@@ -1,6 +1,6 @@
 import './index.css'
-import AgentChat from './agent/AgentChat.tsx'
-import { AgentProvider } from './agent/useAgent.tsx'
+import AgentChat from './agent/client/AgentChat.tsx'
+import { AgentProvider } from './agent/client/useAgent.tsx'
 
 export function App() {
 	return (

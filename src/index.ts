@@ -1,7 +1,9 @@
 import { serve } from 'bun'
 import index from './index.html'
-import { placeholderEvents } from './agent/placeholderData'
-import { simulateEventStream } from './agent/simulateEventStream'
+import { placeholderEvents } from './agent/server/placeholderData'
+import { simulateEventStream } from './agent/server/simulateEventStream'
+
+const SIMULATE_ERROR = true
 
 const server = serve({
 	routes: {
@@ -10,7 +12,11 @@ const server = serve({
 				const body = await req.json()
 				console.log('Received chat message:', body)
 
-				const stream = simulateEventStream(placeholderEvents)
+				// Set simulateError to true to test error handling
+				const stream = simulateEventStream(
+					placeholderEvents,
+					SIMULATE_ERROR
+				)
 
 				return new Response(stream, {
 					headers: {

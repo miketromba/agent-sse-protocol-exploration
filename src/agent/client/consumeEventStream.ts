@@ -3,14 +3,14 @@ import type {
 	AgentEventChunk,
 	MessageEvent,
 	ToolEvent
-} from './types'
+} from '../types'
 
 type EventStartCallback = (event: AgentEvent) => void
 type EventUpdateCallback = (event: AgentEvent) => void
 type ErrorCallback = (error: Error) => void
 type CompleteCallback = () => void
 
-type ConsumeEventStreamOptions = {
+type StreamEventsOptions = {
 	url: string
 	message: string
 	onEventStart: EventStartCallback
@@ -32,14 +32,14 @@ type ToolState = {
 
 type AssemblyState = MessageState | ToolState | null
 
-export async function consumeEventStream({
+export async function streamEvents({
 	url,
 	message,
 	onEventStart,
 	onEventUpdate,
 	onError,
 	onComplete
-}: ConsumeEventStreamOptions) {
+}: StreamEventsOptions) {
 	let state: AssemblyState = null
 
 	const processChunk = (chunk: AgentEventChunk) => {

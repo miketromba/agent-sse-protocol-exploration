@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
-import type { AgentEvent } from './types'
-import { consumeEventStream } from './consumeEventStream'
+import type { AgentEvent } from '../types'
+import { streamEvents } from './consumeEventStream'
 
 type AgentContextType = {
 	events: AgentEvent[]
@@ -33,7 +33,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 		setIsThinking(true)
 
 		// Stream events from server
-		await consumeEventStream({
+		await streamEvents({
 			url: '/stream-events',
 			message: text,
 			onEventStart: event => {

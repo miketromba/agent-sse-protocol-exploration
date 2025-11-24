@@ -1,5 +1,5 @@
-import type { AgentEvent, AgentEventChunk } from './types'
-import { EventStream } from './EventStream'
+import type { AgentEvent, AgentEventChunk } from '../types'
+import { EventStream } from '../EventStream'
 
 // Helper to generate a random number between min and max
 function rand(min: number, max: number) {
@@ -36,7 +36,10 @@ function* eventToChunks(event: AgentEvent): Generator<AgentEventChunk> {
 	}
 }
 
-export function simulateEventStream(events: AgentEvent[]) {
+export function simulateEventStream(
+	events: AgentEvent[],
+	simulateError: boolean = false
+) {
 	const stream = new EventStream()
 
 	// Start the simulation asynchronously
@@ -53,7 +56,7 @@ export function simulateEventStream(events: AgentEvent[]) {
 					chunkCount++
 
 					// Simulate an error after a few chunks (for testing)
-					if (chunkCount === 5) {
+					if (simulateError && chunkCount === 5) {
 						throw new Error(
 							'Simulated streaming error: Connection interrupted'
 						)
