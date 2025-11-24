@@ -1,4 +1,10 @@
-# bun-react-tailwind-template
+# Agent SSE Protocol Exploration
+
+Most agent SDKs and APIs make strong, inflexible assumptions about the state of your system and the protocol used to stream it. This is an exploration of reclaiming ownership over the form and streaming protocol of that state.
+
+![image](./src/assets/image.png)
+
+## Initialized with bun-react-tailwind-template
 
 To install dependencies:
 
