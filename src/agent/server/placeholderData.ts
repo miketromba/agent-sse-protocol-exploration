@@ -10,6 +10,7 @@ export const placeholderEvents: AgentEvent[] = [
 	},
 	{
 		type: 'tool',
+		id: 'tool-1',
 		toolName: 'fetchWebsiteMetrics',
 		input: '{ url: "https://example.com", metrics: ["load_time", "size", "requests"] }',
 		output: '{ load_time: "3.2s", total_size: "2.1MB", total_requests: 47, status: "ok" }'
@@ -21,6 +22,7 @@ export const placeholderEvents: AgentEvent[] = [
 	},
 	{
 		type: 'tool',
+		id: 'tool-2',
 		toolName: 'analyzePerformanceTimeline',
 		input: '{ url: "https://example.com" }',
 		output: '{ breakdown: { html: "0.8s", css: "0.5s", javascript: "1.4s", images: "0.3s", fonts: "0.2s" } }'
@@ -32,6 +34,7 @@ export const placeholderEvents: AgentEvent[] = [
 	},
 	{
 		type: 'tool',
+		id: 'tool-3',
 		toolName: 'identifyLargeAssets',
 		input: '{ url: "https://example.com", type: "javascript", minSize: "50KB" }',
 		output: '{ assets: [{ name: "bundle.js", size: "450KB", blocking: true }, { name: "analytics.js", size: "120KB", blocking: false }, { name: "vendor.js", size: "380KB", blocking: true }] }'
@@ -43,6 +46,7 @@ export const placeholderEvents: AgentEvent[] = [
 	},
 	{
 		type: 'tool',
+		id: 'tool-4',
 		toolName: 'checkAssetOptimization',
 		input: '{ assets: ["bundle.js", "vendor.js"], checks: ["minification", "compression", "tree_shaking"] }',
 		output: '{ bundle_js: { minified: true, compressed: "gzip", tree_shaking: false, savings_potential: "35%" }, vendor_js: { minified: true, compressed: "gzip", tree_shaking: false, savings_potential: "42%" } }'
@@ -54,6 +58,7 @@ export const placeholderEvents: AgentEvent[] = [
 	},
 	{
 		type: 'tool',
+		id: 'tool-5',
 		toolName: 'analyzeCacheHeaders',
 		input: '{ url: "https://example.com" }',
 		output: '{ static_assets: { cache_control: "public, max-age=3600", issues: ["short_cache_duration"] }, images: { cache_control: "no-cache", issues: ["no_caching", "missing_etag"] } }'
@@ -65,6 +70,7 @@ export const placeholderEvents: AgentEvent[] = [
 	},
 	{
 		type: 'tool',
+		id: 'tool-6',
 		toolName: 'generateOptimizationReport',
 		input: '{ findings: ["large_js_bundles", "no_tree_shaking", "poor_caching"], url: "https://example.com" }',
 		output: '{ priority_issues: 3, total_savings: "1.2s", recommendations: ["enable_tree_shaking", "extend_cache_duration", "implement_image_caching", "code_splitting"] }'

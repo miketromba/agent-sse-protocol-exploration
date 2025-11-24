@@ -166,16 +166,13 @@ export default function AgentChat() {
 									</div>
 								)
 							} else if (event.type === 'tool') {
-								const isLastEvent = index === events.length - 1
 								return (
 									<div key={index}>
 										<ToolEvent
 											toolName={event.toolName}
 											input={event.input}
 											output={event.output}
-											isStreaming={
-												isStreaming && isLastEvent
-											}
+											isStreaming={isStreaming}
 										/>
 									</div>
 								)

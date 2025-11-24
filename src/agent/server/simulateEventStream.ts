@@ -31,9 +31,10 @@ function* eventToChunks(event: AgentEvent): Generator<AgentEventChunk> {
 		}
 	} else if (event.type === 'tool') {
 		// Tool call: start, input, output
-		yield { type: 'tool_start', toolName: event.toolName }
-		yield { type: 'tool_input', input: event.input }
-		yield { type: 'tool_output', output: event.output }
+		// Use the tool's ID from the event
+		yield { type: 'tool_start', id: event.id, toolName: event.toolName }
+		yield { type: 'tool_input', id: event.id, input: event.input }
+		yield { type: 'tool_output', id: event.id, output: event.output }
 	}
 }
 

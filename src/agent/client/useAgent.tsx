@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import type { AgentEvent } from '../types'
 import { consumeEventStream } from './consumeEventStream'
+import { useEvents } from './useEvents'
 
 type AgentContextType = {
 	events: AgentEvent[]
@@ -13,7 +14,7 @@ type AgentContextType = {
 const AgentContext = createContext<AgentContextType | undefined>(undefined)
 
 export function AgentProvider({ children }: { children: ReactNode }) {
-	const [events, setEvents] = useState<AgentEvent[]>([])
+	const { events, addEvent, addEventChunk } = useEvents()
 	const [isStreaming, setIsStreaming] = useState(false)
 	const [isThinking, setIsThinking] = useState(false)
 	const [error, setError] = useState<string | null>(null)
@@ -28,7 +29,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 			role: 'user',
 			text
 		}
-		setEvents(prev => [...prev, userMessage])
+		addEvent(userMessage)
 		setIsStreaming(true)
 		setIsThinking(true)
 
@@ -36,25 +37,17 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 		await consumeEventStream({
 			url: '/stream-events',
 			message: text,
-			onEventStart: event => {
-				// First chunk received, no longer thinking
+			onEventChunk: chunk => {
 				setIsThinking(false)
-				// Add new event to the list
-				setEvents(prev => [...prev, event])
-			},
-			onEventUpdate: event => {
-				// Update the last event in the list
-				setEvents(prev => [...prev.slice(0, -1), event])
+				addEventChunk(chunk)
 			},
 			onError: error => {
 				console.error('Error consuming event stream:', error)
-				// Set error state (ephemeral, will clear on next message)
 				setError(error.message || 'An error occurred while streaming')
 				setIsStreaming(false)
 				setIsThinking(false)
 			},
 			onComplete: () => {
-				// Stream complete
 				setIsStreaming(false)
 				setIsThinking(false)
 			}
