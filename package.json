@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.45",
+    "@msgpack/msgpack": "^3.1.2",
     "ai": "^5.0.101",
     "bun-plugin-tailwind": "^0.1.2",
     "lucide-react": "^0.554.0",
