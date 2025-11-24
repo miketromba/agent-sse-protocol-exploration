@@ -38,4 +38,14 @@ export class EventStream {
 	getReadableStream(): ReadableStream<Uint8Array> {
 		return this.stream
 	}
+
+	toNDJSONStreamResponse(): Response {
+		return new Response(this.getReadableStream(), {
+			headers: {
+				'Content-Type': 'application/x-ndjson',
+				'Cache-Control': 'no-cache',
+				Connection: 'keep-alive'
+			}
+		})
+	}
 }

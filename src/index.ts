@@ -1,30 +1,25 @@
 import { serve } from 'bun'
 import index from './index.html'
-import { placeholderEvents } from './agent/server/placeholderData'
-import { simulateEventStream } from './agent/server/simulateEventStream'
+import { streamAgentResponse } from './agent/server/Agent'
+import z from 'zod'
 
-const SIMULATE_ERROR = true
+// import { simulateEventStream } from './agent/server/simulateEventStream'
+// const SIMULATE_ERROR = true
 
 const server = serve({
 	routes: {
 		'/stream-events': {
 			POST: async req => {
-				const body = await req.json()
+				const rawBody = await req.json()
+				const body = z.object({ message: z.string() }).parse(rawBody)
 				console.log('Received chat message:', body)
 
 				// Set simulateError to true to test error handling
-				const stream = simulateEventStream(
-					placeholderEvents,
-					SIMULATE_ERROR
-				)
+				// const eventStream = simulateEventStream(placeholderEvents, SIMULATE_ERROR)
 
-				return new Response(stream, {
-					headers: {
-						'Content-Type': 'application/x-ndjson',
-						'Cache-Control': 'no-cache',
-						Connection: 'keep-alive'
-					}
-				})
+				const eventStream = streamAgentResponse(body.message)
+
+				return eventStream.toNDJSONStreamResponse()
 			}
 		},
 		// Serve index.html for all unmatched routes.

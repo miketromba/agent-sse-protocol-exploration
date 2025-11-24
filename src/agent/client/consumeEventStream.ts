@@ -32,7 +32,7 @@ type ToolState = {
 
 type AssemblyState = MessageState | ToolState | null
 
-export async function streamEvents({
+export async function consumeEventStream({
 	url,
 	message,
 	onEventStart,

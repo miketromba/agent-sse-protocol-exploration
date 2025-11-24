@@ -1,5 +1,6 @@
 import type { AgentEvent, AgentEventChunk } from '../types'
 import { EventStream } from '../EventStream'
+import { placeholderEvents } from './placeholderData'
 
 // Helper to generate a random number between min and max
 function rand(min: number, max: number) {
@@ -37,7 +38,7 @@ function* eventToChunks(event: AgentEvent): Generator<AgentEventChunk> {
 }
 
 export function simulateEventStream(
-	events: AgentEvent[],
+	events: AgentEvent[] = placeholderEvents,
 	simulateError: boolean = false
 ) {
 	const stream = new EventStream()
@@ -77,5 +78,5 @@ export function simulateEventStream(
 		}
 	})()
 
-	return stream.getReadableStream()
+	return stream
 }
