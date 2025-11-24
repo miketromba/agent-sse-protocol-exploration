@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import {
+	createContext,
+	useContext,
+	useRef,
+	useState,
+	type ReactNode
+} from 'react'
 import type { AgentEvent } from '../types'
 import { consumeEventStream } from './consumeEventStream'
 import { useEvents } from './useEvents'
@@ -6,6 +12,7 @@ import { useEvents } from './useEvents'
 type AgentContextType = {
 	events: AgentEvent[]
 	sendMessage: (text: string) => void
+	stop: () => void
 	isStreaming: boolean
 	isThinking: boolean
 	error: string | null
@@ -18,6 +25,11 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 	const [isStreaming, setIsStreaming] = useState(false)
 	const [isThinking, setIsThinking] = useState(false)
 	const [error, setError] = useState<string | null>(null)
+	const abortRef = useRef<(() => void) | null>(null)
+
+	const stop = () => {
+		abortRef.current?.()
+	}
 
 	const sendMessage = async (text: string) => {
 		// Clear any previous error
@@ -34,7 +46,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 		setIsThinking(true)
 
 		// Stream events from server
-		await consumeEventStream({
+		const { abort, promise } = consumeEventStream({
 			url: '/stream-events',
 			message: text,
 			onEventChunk: chunk => {
@@ -43,20 +55,36 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 			},
 			onError: error => {
 				console.error('Error consuming event stream:', error)
-				setError(error.message || 'An error occurred while streaming')
+				// Don't set error message if it was aborted by user
+				if (error.name !== 'AbortError') {
+					setError(
+						error.message || 'An error occurred while streaming'
+					)
+				}
 				setIsStreaming(false)
 				setIsThinking(false)
 			},
-			onComplete: () => {
+			onEnd: () => {
+				abortRef.current = null
 				setIsStreaming(false)
 				setIsThinking(false)
 			}
 		})
+
+		abortRef.current = abort
+		await promise
 	}
 
 	return (
 		<AgentContext.Provider
-			value={{ events, sendMessage, isStreaming, isThinking, error }}
+			value={{
+				events,
+				sendMessage,
+				stop,
+				isStreaming,
+				isThinking,
+				error
+			}}
 		>
 			{children}
 		</AgentContext.Provider>

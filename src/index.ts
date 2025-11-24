@@ -17,7 +17,10 @@ const server = serve({
 				// Set simulateError to true to test error handling
 				// const eventStream = simulateEventStream(placeholderEvents, SIMULATE_ERROR)
 
-				const eventStream = streamAgentResponse(body.message)
+				const eventStream = streamAgentResponse({
+					message: body.message,
+					abortSignal: req.signal
+				})
 
 				return eventStream.toNDJSONStreamResponse()
 			}

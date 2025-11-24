@@ -3,7 +3,13 @@ import { anthropic } from '@ai-sdk/anthropic'
 import { EventStream } from '../EventStream'
 import { getWeatherTool } from './getWeatherTool'
 
-export function streamAgentResponse(message: string): EventStream {
+export function streamAgentResponse({
+	message,
+	abortSignal
+}: {
+	message: string
+	abortSignal?: AbortSignal
+}): EventStream {
 	const eventStream = new EventStream()
 
 	// Start streaming asynchronously
@@ -15,7 +21,8 @@ export function streamAgentResponse(message: string): EventStream {
 				tools: {
 					getWeather: getWeatherTool
 				},
-				stopWhen: stepCountIs(10)
+				stopWhen: stepCountIs(10),
+				abortSignal
 			})
 
 			// Consume the async iterator directly - more efficient than pipeTo

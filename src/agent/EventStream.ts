@@ -5,18 +5,22 @@ export class EventStream {
 	private controller: ReadableStreamDefaultController<Uint8Array> | null =
 		null
 	private encoder = new TextEncoder()
+	private isCancelled = false
 
 	constructor() {
 		this.stream = new ReadableStream({
 			start: controller => {
 				this.controller = controller
+			},
+			cancel: () => {
+				this.isCancelled = true
 			}
 		})
 	}
 
 	push(chunk: AgentEventChunk) {
-		if (!this.controller) {
-			throw new Error('Stream controller not initialized')
+		if (!this.controller || this.isCancelled) {
+			return
 		}
 
 		const chunkLine = JSON.stringify(chunk) + '\n'
@@ -24,7 +28,7 @@ export class EventStream {
 	}
 
 	close() {
-		if (this.controller) {
+		if (this.controller && !this.isCancelled) {
 			this.controller.close()
 		}
 	}

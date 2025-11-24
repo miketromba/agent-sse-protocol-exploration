@@ -1,5 +1,5 @@
 import { useAgent } from './useAgent.tsx'
-import { ChevronRight, Send, Loader2, AlertCircle } from 'lucide-react'
+import { ChevronRight, Send, Loader2, AlertCircle, Square } from 'lucide-react'
 import { useState } from 'react'
 
 function MessageEvent(text: string, role: 'user' | 'agent') {
@@ -83,7 +83,15 @@ function ToolEvent({
 	)
 }
 
-function ChatInput({ onSend }: { onSend: (message: string) => void }) {
+function ChatInput({
+	onSend,
+	onStop,
+	isStreaming
+}: {
+	onSend: (message: string) => void
+	onStop: () => void
+	isStreaming: boolean
+}) {
 	const [input, setInput] = useState('')
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -105,14 +113,25 @@ function ChatInput({ onSend }: { onSend: (message: string) => void }) {
 				onChange={e => setInput(e.target.value)}
 				placeholder="Type a message..."
 				className="flex-1 bg-gray-800 text-gray-100 px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-gray-500"
+				disabled={isStreaming}
 			/>
-			<button
-				type="submit"
-				className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-				disabled={!input.trim()}
-			>
-				<Send className="w-5 h-5" />
-			</button>
+			{isStreaming ? (
+				<button
+					type="button"
+					onClick={onStop}
+					className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors"
+				>
+					<Square className="w-5 h-5" />
+				</button>
+			) : (
+				<button
+					type="submit"
+					className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+					disabled={!input.trim()}
+				>
+					<Send className="w-5 h-5" />
+				</button>
+			)}
 		</form>
 	)
 }
@@ -149,7 +168,8 @@ function ErrorEvent({ message }: { message: string }) {
 }
 
 export default function AgentChat() {
-	const { events, sendMessage, isStreaming, isThinking, error } = useAgent()
+	const { events, sendMessage, stop, isStreaming, isThinking, error } =
+		useAgent()
 
 	return (
 		<div className="w-full max-w-lg text-sm mx-auto p-4 border border-gray-700 rounded-lg">
@@ -184,7 +204,11 @@ export default function AgentChat() {
 					</>
 				)}
 			</div>
-			<ChatInput onSend={sendMessage} />
+			<ChatInput
+				onSend={sendMessage}
+				onStop={stop}
+				isStreaming={isStreaming}
+			/>
 		</div>
 	)
 }
