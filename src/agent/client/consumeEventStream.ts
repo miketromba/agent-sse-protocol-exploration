@@ -97,8 +97,8 @@ export function consumeEventStream({
 			// Don't log AbortError - it's expected when user stops
 			if (err.name !== 'AbortError') {
 				console.error('Stream error:', error)
+				onError?.(err)
 			}
-			onError?.(err)
 		} finally {
 			// Always call onEnd, whether success or error
 			onEnd?.()

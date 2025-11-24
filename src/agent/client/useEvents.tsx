@@ -67,13 +67,16 @@ export function useEvents() {
 					event => 'id' in event && event.id === update.id
 				)
 				if (index !== -1) {
-					return [
-						...prev.slice(0, index),
-						{ ...prev[index], ...update },
-						...prev.slice(index + 1)
-					] as AgentEvent[]
+					// Use map for single-pass update
+					return prev.map((event, i) =>
+						i === index
+							? ({ ...event, ...update } as AgentEvent)
+							: event
+					)
 				}
 			} else if (update.type === 'message') {
+				// Find last agent message from the end
+				let lastAgentIndex = -1
 				for (let i = prev.length - 1; i >= 0; i--) {
 					const event = prev[i]
 					if (
@@ -81,12 +84,17 @@ export function useEvents() {
 						event.type === 'message' &&
 						event.role === 'agent'
 					) {
-						return [
-							...prev.slice(0, i),
-							{ ...event, ...update },
-							...prev.slice(i + 1)
-						] as AgentEvent[]
+						lastAgentIndex = i
+						break
 					}
+				}
+
+				if (lastAgentIndex !== -1) {
+					return prev.map((event, i) =>
+						i === lastAgentIndex
+							? ({ ...event, ...update } as AgentEvent)
+							: event
+					)
 				}
 			}
 			return [...prev, update as AgentEvent]

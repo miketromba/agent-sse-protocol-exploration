@@ -55,12 +55,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 			},
 			onError: error => {
 				console.error('Error consuming event stream:', error)
-				// Don't set error message if it was aborted by user
-				if (error.name !== 'AbortError') {
-					setError(
-						error.message || 'An error occurred while streaming'
-					)
-				}
+				setError(error.message || 'An error occurred while streaming')
 				setIsStreaming(false)
 				setIsThinking(false)
 			},
