@@ -168,39 +168,84 @@ function ErrorEvent({ message }: { message: string }) {
 }
 
 export default function AgentChat() {
-	const { events, sendMessage, stop, isStreaming, isThinking, error } =
-		useAgent()
+	const {
+		events,
+		sendMessage,
+		stop,
+		isStreaming,
+		isThinking,
+		error,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+		isLoadingEvents
+	} = useAgent()
 
 	return (
 		<div className="w-full max-w-lg text-sm mx-auto p-4 border border-gray-700 rounded-lg">
 			<div className="flex flex-col gap-2 mb-4">
-				{events.length === 0 ? (
-					MessageEvent('Hello, how can I help you today?', 'agent')
+				{/* Initial Loading State */}
+				{isLoadingEvents ? (
+					<div className="flex items-center justify-center gap-2 py-8 text-gray-400">
+						<Loader2 className="w-5 h-5 animate-spin" />
+						<span>Loading conversation history...</span>
+					</div>
 				) : (
 					<>
-						{events.map((event, index) => {
-							if (event.type === 'message') {
-								return (
-									<div key={index}>
-										{MessageEvent(event.text, event.role)}
-									</div>
-								)
-							} else if (event.type === 'tool') {
-								return (
-									<div key={index}>
-										<ToolEvent
-											toolName={event.toolName}
-											input={event.input}
-											output={event.output}
-											isStreaming={isStreaming}
-										/>
-									</div>
-								)
-							}
-							return null
-						})}
-						{isThinking && <ThinkingIndicator />}
-						{error && <ErrorEvent message={error} />}
+						{/* Load More Button */}
+						{hasNextPage && (
+							<div className="flex justify-center mb-2">
+								<button
+									onClick={() => fetchNextPage()}
+									disabled={isFetchingNextPage}
+									className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+								>
+									{isFetchingNextPage ? (
+										<>
+											<Loader2 className="w-4 h-4 animate-spin" />
+											<span>Loading...</span>
+										</>
+									) : (
+										<span>Load More History</span>
+									)}
+								</button>
+							</div>
+						)}
+						{events.length === 0 ? (
+							MessageEvent(
+								'Hello, how can I help you today?',
+								'agent'
+							)
+						) : (
+							<>
+								{events.map((event, index) => {
+									if (event.type === 'message') {
+										return (
+											<div key={index}>
+												{MessageEvent(
+													event.text,
+													event.role
+												)}
+											</div>
+										)
+									} else if (event.type === 'tool') {
+										return (
+											<div key={index}>
+												<ToolEvent
+													toolName={event.toolName}
+													input={event.input}
+													output={event.output}
+													isStreaming={isStreaming}
+												/>
+											</div>
+										)
+									}
+									return null
+								})}
+								{isThinking && <ThinkingIndicator />}
+								{error && <ErrorEvent message={error} />}
+							</>
+						)}
 					</>
 				)}
 			</div>

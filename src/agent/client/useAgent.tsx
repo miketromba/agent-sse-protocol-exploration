@@ -16,12 +16,24 @@ type AgentContextType = {
 	isStreaming: boolean
 	isThinking: boolean
 	error: string | null
+	fetchNextPage: () => void
+	hasNextPage: boolean
+	isFetchingNextPage: boolean
+	isLoadingEvents: boolean
 }
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined)
 
 export function AgentProvider({ children }: { children: ReactNode }) {
-	const { events, addEvent, addEventChunk } = useEvents()
+	const {
+		events,
+		addEvent,
+		addEventChunk,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+		isLoading
+	} = useEvents()
 	const [isStreaming, setIsStreaming] = useState(false)
 	const [isThinking, setIsThinking] = useState(false)
 	const [error, setError] = useState<string | null>(null)
@@ -78,7 +90,11 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 				stop,
 				isStreaming,
 				isThinking,
-				error
+				error,
+				fetchNextPage,
+				hasNextPage,
+				isFetchingNextPage,
+				isLoadingEvents: isLoading
 			}}
 		>
 			{children}

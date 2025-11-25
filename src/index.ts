@@ -36,8 +36,33 @@ const server = serve({
 		},
 
 		'/event-history': {
-			GET: async () => {
-				return new Response(JSON.stringify(conversationStore))
+			GET: async req => {
+				// Sleep to see loading state
+				await new Promise(resolve => setTimeout(resolve, 500))
+
+				// Parse query params for pagination
+				const url = new URL(req.url)
+				const page = parseInt(url.searchParams.get('page') || '0')
+				const limit = parseInt(url.searchParams.get('limit') || '20')
+
+				// Calculate pagination from the end (newest first)
+				const totalEvents = conversationStore.length
+				const start = Math.max(0, totalEvents - (page + 1) * limit)
+				const end = totalEvents - page * limit
+
+				// Get events in chronological order (oldest to newest within page)
+				const paginatedEvents = conversationStore.slice(start, end)
+				const hasMore = start > 0
+
+				return new Response(
+					JSON.stringify({
+						events: paginatedEvents,
+						page,
+						limit,
+						hasMore,
+						total: totalEvents
+					})
+				)
 			}
 		},
 		// Serve index.html for all unmatched routes.
