@@ -45,13 +45,6 @@ export function useEvents(projectId?: string) {
 	const [assembler] = useState(() => new EventAssembler())
 	const [updateCounter, setUpdateCounter] = useState(0)
 
-	// Get real-time events from assembler (memoized to avoid unnecessary re-renders)
-	// Create a new array to ensure the reference changes when events are added
-	const realtimeEvents = useMemo(
-		() => [...assembler.getEvents()],
-		[assembler, updateCounter]
-	)
-
 	// Fetch paginated event history
 	const {
 		data,
@@ -81,17 +74,16 @@ export function useEvents(projectId?: string) {
 
 	// Merge historical and real-time events
 	const events = useMemo(() => {
+		const realtimeEvents = assembler.getEvents()
 		return [...historicalEvents, ...realtimeEvents]
-	}, [historicalEvents, realtimeEvents])
+	}, [historicalEvents, assembler, updateCounter])
 
 	function addEvent(event: AgentEvent) {
-		// Directly add to the real-time events array
-		assembler.getEvents().push(event)
+		assembler.addEvent(event)
 		setUpdateCounter(c => c + 1)
 	}
 
 	function addEventChunk(chunk: AgentEventChunk) {
-		// Use shared assembler logic
 		assembler.addChunk(chunk)
 		setUpdateCounter(c => c + 1)
 	}

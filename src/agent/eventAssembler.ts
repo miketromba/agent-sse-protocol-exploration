@@ -52,4 +52,8 @@ export class EventAssembler {
 			}
 		}
 	}
+
+	addEvent(event: AgentEvent): void {
+		this.events.push(event)
+	}
 }

@@ -1,87 +1,93 @@
 import { useAgent } from './useAgent.tsx'
 import { ChevronRight, Send, Loader2, AlertCircle, Square } from 'lucide-react'
-import { useState } from 'react'
+import { useState, memo } from 'react'
 
-function MessageEvent(text: string, role: 'user' | 'agent') {
-	return (
-		<div
-			className={`flex mb-2 ${
-				role === 'user' ? 'justify-end' : 'justify-start'
-			}`}
-		>
+// Memoized message component to prevent unnecessary re-renders
+const MessageEvent = memo(
+	({ text, role }: { text: string; role: 'user' | 'agent' }) => {
+		return (
 			<div
-				className={`max-w-xs px-4 py-2 rounded-lg shadow ${
-					role === 'user'
-						? 'bg-blue-600 text-white rounded-br-none'
-						: 'bg-gray-700 text-gray-100 rounded-bl-none'
+				className={`flex mb-2 ${
+					role === 'user' ? 'justify-end' : 'justify-start'
 				}`}
 			>
-				<span>{text}</span>
-			</div>
-		</div>
-	)
-}
-
-function ToolEvent({
-	toolName,
-	input,
-	output,
-	isStreaming
-}: {
-	toolName: string
-	input: string
-	output: string
-	isStreaming: boolean
-}) {
-	const [isExpanded, setIsExpanded] = useState(false)
-	const isLoading = isStreaming && !output
-
-	return (
-		<div className="my-2">
-			<button
-				onClick={() => setIsExpanded(expanded => !expanded)}
-				className={`w-full flex items-center gap-2 ${
-					isExpanded ? 'bg-gray-700' : 'bg-gray-800'
-				} text-gray-100 text-xs font-mono px-3 py-2 rounded hover:bg-gray-600 transition-colors`}
-			>
-				<ChevronRight
-					className={`w-3 h-3 transition-transform ${
-						isExpanded ? 'rotate-90' : ''
+				<div
+					className={`max-w-xs px-4 py-2 rounded-lg shadow ${
+						role === 'user'
+							? 'bg-blue-600 text-white rounded-br-none'
+							: 'bg-gray-700 text-gray-100 rounded-bl-none'
 					}`}
-				/>
-				<span className="flex items-center gap-2">
-					🛠️ {toolName}
-					{isLoading && (
-						<Loader2 className="w-3 h-3 animate-spin text-blue-400" />
-					)}
-				</span>
-			</button>
-			{isExpanded && (
-				<div className="mt-1 ml-5 space-y-1 text-xs">
-					<div className="bg-gray-800 text-gray-300 font-mono px-3 py-2 rounded">
-						<div className="text-gray-500 font-semibold mb-1">
-							Input:
-						</div>
-						<div className="break-all">{input || '...'}</div>
-					</div>
-					<div className="bg-gray-800 text-gray-300 font-mono px-3 py-2 rounded">
-						<div className="text-gray-500 font-semibold mb-1">
-							Output:
-						</div>
-						{isLoading ? (
-							<div className="flex items-center gap-2 text-gray-400">
-								<Loader2 className="w-3 h-3 animate-spin" />
-								<span>Processing...</span>
-							</div>
-						) : (
-							<div className="break-all">{output}</div>
-						)}
-					</div>
+				>
+					<span>{text}</span>
 				</div>
-			)}
-		</div>
-	)
-}
+			</div>
+		)
+	}
+)
+
+// Memoized tool component to prevent unnecessary re-renders
+const ToolEvent = memo(
+	({
+		toolName,
+		input,
+		output,
+		isStreaming
+	}: {
+		toolName: string
+		input: string
+		output: string
+		isStreaming: boolean
+	}) => {
+		const [isExpanded, setIsExpanded] = useState(false)
+		const isLoading = isStreaming && !output
+
+		return (
+			<div className="my-2">
+				<button
+					onClick={() => setIsExpanded(expanded => !expanded)}
+					className={`w-full flex items-center gap-2 ${
+						isExpanded ? 'bg-gray-700' : 'bg-gray-800'
+					} text-gray-100 text-xs font-mono px-3 py-2 rounded hover:bg-gray-600 transition-colors`}
+				>
+					<ChevronRight
+						className={`w-3 h-3 transition-transform ${
+							isExpanded ? 'rotate-90' : ''
+						}`}
+					/>
+					<span className="flex items-center gap-2">
+						🛠️ {toolName}
+						{isLoading && (
+							<Loader2 className="w-3 h-3 animate-spin text-blue-400" />
+						)}
+					</span>
+				</button>
+				{isExpanded && (
+					<div className="mt-1 ml-5 space-y-1 text-xs">
+						<div className="bg-gray-800 text-gray-300 font-mono px-3 py-2 rounded">
+							<div className="text-gray-500 font-semibold mb-1">
+								Input:
+							</div>
+							<div className="break-all">{input || '...'}</div>
+						</div>
+						<div className="bg-gray-800 text-gray-300 font-mono px-3 py-2 rounded">
+							<div className="text-gray-500 font-semibold mb-1">
+								Output:
+							</div>
+							{isLoading ? (
+								<div className="flex items-center gap-2 text-gray-400">
+									<Loader2 className="w-3 h-3 animate-spin" />
+									<span>Processing...</span>
+								</div>
+							) : (
+								<div className="break-all">{output}</div>
+							)}
+						</div>
+					</div>
+				)}
+			</div>
+		)
+	}
+)
 
 function ChatInput({
 	onSend,
@@ -212,32 +218,35 @@ export default function AgentChat() {
 							</div>
 						)}
 						{events.length === 0 ? (
-							MessageEvent(
-								'Hello, how can I help you today?',
-								'agent'
-							)
+							<MessageEvent
+								text="Hello, how can I help you today?"
+								role="agent"
+							/>
 						) : (
 							<>
 								{events.map((event, index) => {
+									const key =
+										'id' in event
+											? event.id
+											: `event-${index}`
+
 									if (event.type === 'message') {
 										return (
-											<div key={index}>
-												{MessageEvent(
-													event.text,
-													event.role
-												)}
-											</div>
+											<MessageEvent
+												key={key}
+												text={event.text}
+												role={event.role}
+											/>
 										)
 									} else if (event.type === 'tool') {
 										return (
-											<div key={index}>
-												<ToolEvent
-													toolName={event.toolName}
-													input={event.input}
-													output={event.output}
-													isStreaming={isStreaming}
-												/>
-											</div>
+											<ToolEvent
+												key={key}
+												toolName={event.toolName}
+												input={event.input}
+												output={event.output}
+												isStreaming={isStreaming}
+											/>
 										)
 									}
 									return null

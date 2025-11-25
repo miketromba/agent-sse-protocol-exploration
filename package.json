@@ -17,6 +17,7 @@
     "lucide-react": "^0.554.0",
     "react": "^19",
     "react-dom": "^19",
+    "react-scan": "^0.4.3",
     "tailwindcss": "^4.1.11",
     "zod": "^4.1.13"
   },

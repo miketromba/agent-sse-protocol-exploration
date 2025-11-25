@@ -5,16 +5,26 @@
  * It is included in `src/index.html`.
  */
 
-import { createRoot } from "react-dom/client";
-import { App } from "./App";
+import { createRoot } from 'react-dom/client'
+import { scan } from 'react-scan'
+import { App } from './App'
 
-function start() {
-  const root = createRoot(document.getElementById("root")!);
-  root.render(<App />);
+// Enable React Scan for render performance auditing
+// This will highlight components that re-render in the browser
+if (typeof window !== 'undefined') {
+	scan({
+		enabled: true,
+		log: true // Log render info to console
+	})
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", start);
+function start() {
+	const root = createRoot(document.getElementById('root')!)
+	root.render(<App />)
+}
+
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', start)
 } else {
-  start();
+	start()
 }
